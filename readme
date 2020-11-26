@@ -1,0 +1,50 @@
+storage is used to read, write to the localstorage.
+
+to install
+
+##$ npm i @abarchibody/storage
+
+Usage
+
+```javascript
+const data = [1, 2, 3, 4]
+```
+
+## import storage from '@abarchibody/storage'
+
+## Write to localstorage
+```javascript
+storage.set('data', data);
+```
+### OR
+```javascript
+# storage.write('data', data);
+```
+
+## Read to localstorage
+
+```javascript
+const myData = storage.get('data')
+```
+### OR
+```javascript
+const myData = storage.read('data')
+```
+
+```javascript
+console.log(myData)
+```
+// [1, 2, 3, 4]
+
+## Delete data to localstorage
+
+```javascript
+storage.remove('data');
+```
+
+### OR
+
+```javascript
+storage.del('data');
+```
+

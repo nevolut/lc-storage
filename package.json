@@ -1,0 +1,21 @@
+{
+  "name": "@abarchibody/storage",
+  "version": "1.0.2",
+  "description": "Storage is plugin that help to store data in the local storage, or retrieve data",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "front-end",
+    "browser",
+    "vue",
+    "react",
+    "angular",
+    "ionic",
+    "localstorage",
+    "sessionstorage",
+    "browserstorage"
+  ],
+  "author": "abarchibody",
+  "license": "ISC",
+  "dependencies": {}
+}
