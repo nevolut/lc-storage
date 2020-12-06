@@ -18,7 +18,7 @@ storage.set('data', data);
 ```
 ### OR
 ```javascript
-# storage.write('data', data);
+storage.write('data', data);
 ```
 
 ## Read to localstorage

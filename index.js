@@ -12,19 +12,22 @@ const storage = {
           let diff = (now - values.time) / 1000;
           diff /= 60;
           diff = Math.abs(Math.round(diff));
-          if (diff > delay) localStorage.removeItem(key);
+          if (diff > delay) this.remove(key);
         }
         return values.data;
       }
     } catch (e) {
-      localStorage.removeItem(key);
+      this.remove(key);
     }
   },
 
   set(key, value, nullable = true) {
     if (key == "undefined") return console.error("Key is missing");
     if (value == "undefined") return console.error("Value is missing");
-    if (nullable && typeof value == 'object' && value.length == 0) return null;
+    if (!value || value == {} || (Array.isArray(value) && !value.length)) {
+      if (nullable) this.remove(key);
+      return null;
+    }
 
     try {
       const now = new Date().getTime();
@@ -35,7 +38,7 @@ const storage = {
   },
 
   remove(key) {
-    localStorage.removeItem(key)
+    localStorage.removeItem(key);
   }
 };
 storage.read = storage.get;
