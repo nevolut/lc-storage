@@ -41,8 +41,9 @@ const storage = {
     localStorage.removeItem(key);
   }
 };
+
 storage.read = storage.get;
 storage.write = storage.set;
 storage.del = storage.remove;
 
-export default storage;
+module.exports = storage;
