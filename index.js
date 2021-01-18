@@ -1,5 +1,5 @@
 const storage = {
-  get(key, check = true, delay = 5) {
+  get(key, renew = null) {
     if (!key) {
       console.error("Key is missing");
       return;
@@ -8,17 +8,18 @@ const storage = {
       const now = new Date().getTime();
       const values = JSON.parse(localStorage.getItem(key));
       if (values && values.data) {
-        if (check && values.time) {
+        if (renew) {
           let diff = (now - values.time) / 1000;
           diff /= 60;
           diff = Math.abs(Math.round(diff));
-          if (diff > delay) this.remove(key);
+          if (diff > renew) this.remove(key);
         }
         return values.data;
       }
     } catch (e) {
       this.remove(key);
     }
+    return null;
   },
 
   set(key, value, nullable = true) {
@@ -39,6 +40,10 @@ const storage = {
 
   remove(key) {
     localStorage.removeItem(key);
+  },
+
+  clear() {
+    localStorage.clear();
   }
 };
 
