@@ -10,10 +10,8 @@ var storage = typeof localStorage !== "undefined" && localStorage !== null
                 if (values === null || values === void 0 ? void 0 : values.data) {
                     if (values.expiration) {
                         var now = new Date().getTime();
-                        var diff = (now - values.expiration) / 1000;
-                        diff /= 60;
-                        diff = Math.abs(Math.round(diff));
-                        if (diff > 0) {
+                        var diff = values.expiration - now;
+                        if (diff < 0) {
                             this.remove(key);
                             return null;
                         }

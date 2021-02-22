@@ -11,10 +11,8 @@ const storage =
             if (values?.data) {
               if (values.expiration) {
                 const now = new Date().getTime();
-                let diff = (now - values.expiration) / 1000;
-                diff /= 60;
-                diff = Math.abs(Math.round(diff));
-                if (diff > 0) {
+                let diff = values.expiration - now;
+                if (diff < 0) {
                   this.remove(key);
                   return null;
                 }
