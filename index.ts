@@ -1,13 +1,13 @@
 const storage =
   typeof localStorage !== "undefined" && localStorage !== null
     ? {
-        get(key: string): Object {
+        get(key: string): Object | null {
           if (!key) {
             console.error("Key is missing");
-            return;
+            return null;
           }
           try {
-            const values = JSON.parse(localStorage.getItem(key));
+            const values = JSON.parse(localStorage.getItem(key) || "");
             if (values?.data) {
               if (values.expiration) {
                 const now = new Date().getTime();
@@ -25,12 +25,10 @@ const storage =
           return null;
         },
 
-        set(key, value, expiration: number, nullable: boolean = false) {
-          if (key == "undefined") return console.error("Key is missing");
-          if (value == "undefined") return console.error("Value is missing");
+        set(key: string, value: any, expiration?: number, nullable?: boolean): object | null {
           if (!value || value == {} || (Array.isArray(value) && !value.length)) {
             if (nullable) this.remove(key);
-            return null;
+            else return null;
           }
 
           try {
@@ -43,29 +41,31 @@ const storage =
                 expiration: expiration ? now + expiration * 1000 : null
               })
             );
+            return value;
           } catch (e) {
             console.error(e);
+            return null;
           }
         },
 
-        remove(key: string) {
+        remove(key: string): void {
           localStorage.removeItem(key);
         },
 
-        clear() {
+        clear(): void {
           localStorage.clear();
         }
       }
     : {
-        set: () => {
+        set: (): void => {
           console.warn("localStorage is not defined");
         },
-        get: () => {
+        get: (): void => {
           console.warn("localStorage is not defined");
         },
-        remove: () => {
+        remove: (): void => {
           console.warn("localStorage is not defined");
         }
       };
 
-module.exports = storage;
+export default storage;
