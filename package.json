@@ -1,6 +1,6 @@
 {
-  "name": "@abarchibody/storage",
-  "version": "1.4.2",
+  "name": "lc-storage",
+  "version": "1.0.0",
   "description": "Storage is plugin that help to store data in the local storage, or retrieve data",
   "main": "index.js",
   "scripts": {},

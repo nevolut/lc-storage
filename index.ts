@@ -1,7 +1,7 @@
 const storage =
   typeof localStorage !== "undefined" && localStorage !== null
     ? {
-        get(key: string): Object | null {
+        get(key: string): string | string[] | Object | Object[] | null {
           if (!key) {
             console.error("Key is missing");
             return null;
@@ -25,7 +25,7 @@ const storage =
           return null;
         },
 
-        set(key: string, value: any, expiration?: number, nullable?: boolean): object | null {
+        set(key: string, value: any, expiration?: number, nullable?: boolean): any {
           if (!value || value == {} || (Array.isArray(value) && !value.length)) {
             if (nullable) this.remove(key);
             else return null;
