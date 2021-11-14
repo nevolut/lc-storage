@@ -62,7 +62,8 @@ storage.clear();
 - creating a new key/value pair if none existed for key previously.
 
 ```javascript
-storage.set(key: string, value: any, expiration?: number, nullable?: boolean): any
+storage.set(key: string, value: any, setOption?: SetOption): any
+storage.set(key: string, value: any, { exp?: number, nullable?: boolean }): any
 ```
 
 * key ```string``` ```required```: The key identifier of data to set
