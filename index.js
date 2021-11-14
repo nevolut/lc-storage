@@ -1,6 +1,5 @@
 "use strict";
 exports.__esModule = true;
-var enc_1 = require("./enc");
 var storage = {
     /**
      * The get method retrieves a value from the storage.
@@ -30,8 +29,6 @@ var storage = {
                         return null;
                     }
                 }
-                if (values.enc)
-                    values.data = decrypt(values.data);
                 return values.data;
             }
         }
@@ -52,7 +49,7 @@ var storage = {
      */
     set: function (key, value, setOption) {
         if (!value || value == {} || (Array.isArray(value) && !value.length)) {
-            if (setOption.nullable)
+            if (setOption === null || setOption === void 0 ? void 0 : setOption.nullable)
                 this.remove(key);
             else
                 return null;
@@ -62,11 +59,7 @@ var storage = {
             data: value,
             time: now
         };
-        if (setOption.enc) {
-            _value.data = encrypt(_value.data);
-            _value.enc = true;
-        }
-        if (setOption.exp)
+        if (setOption === null || setOption === void 0 ? void 0 : setOption.exp)
             _value.exp = now + setOption.exp * 1000;
         try {
             window.localStorage.setItem(key, JSON.stringify(_value));
@@ -111,19 +104,4 @@ if (typeof localStorage === "undefined" || localStorage === null) {
         }
     };
 }
-var __passphrase = "b2916d4d315c43bf40c204767e7d84ae46253fc785d720a4e51769f688ccbe1765e8f00569bc69cd3b9be9158c46e4cc4b510f64fc59adbda2db965bc0c3b003aa36dd5e0199c91fcb650e13385874db36eb7507c13830a3ad434bda46b312a755916d9f";
-var encrypt = function (data) {
-    if (typeof data == 'object')
-        data = JSON.stringify(data);
-    return enc_1["default"].encode(data);
-};
-var decrypt = function (data) {
-    data = enc_1["default"].decode(data);
-    try {
-        return JSON.parse(data);
-    }
-    catch (e) {
-        return data;
-    }
-};
 exports["default"] = storage;

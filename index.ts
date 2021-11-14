@@ -61,7 +61,7 @@ let storage = {
    */
   set(key: string, value: any, setOption?: SetOption): any {
     if (!value || value == {} || (Array.isArray(value) && !value.length)) {
-      if (setOption.nullable) this.remove(key);
+      if (setOption?.nullable) this.remove(key);
       else return null;
     }
 
@@ -72,7 +72,7 @@ let storage = {
       time: now
     };
 
-    if (setOption.exp) _value.exp = now + setOption.exp * 1000;
+    if (setOption?.exp) _value.exp = now + setOption.exp * 1000;
 
     try {
       window.localStorage.setItem(key, JSON.stringify(_value));

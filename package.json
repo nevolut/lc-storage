@@ -1,6 +1,6 @@
 {
   "name": "lc-storage",
-  "version": "2.0.0-beta-3",
+  "version": "2.0.2",
   "description": "Storage is plugin that help to store data in the local storage, or retrieve data",
   "main": "index.js",
   "scripts": {
