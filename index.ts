@@ -1,14 +1,11 @@
-import enc from "./enc";
 
 interface SetOption {
-  exp: number; // Expiration time in second
-  nullable: boolean;
-  enc: boolean;
+  exp?: number; // Expiration time in second
+  nullable?: boolean;
 }
 
 interface SetValue {
   exp?: number; // Expiration time in second
-  enc?: boolean;
   data: any;
   time: number;
 }
@@ -44,8 +41,6 @@ let storage = {
           }
         }
 
-        if (values.enc) values.data = decrypt(values.data);
-
         return values.data;
       }
     } catch (e) {
@@ -76,11 +71,6 @@ let storage = {
       data: value,
       time: now
     };
-
-    if (setOption.enc) {
-      _value.data = encrypt(_value.data);
-      _value.enc = true;
-    }
 
     if (setOption.exp) _value.exp = now + setOption.exp * 1000;
 
@@ -129,16 +119,5 @@ if (typeof localStorage === "undefined" || localStorage === null) {
     }
   };
 }
-
-const __passphrase =
-  "b2916d4d315c43bf40c204767e7d84ae46253fc785d720a4e51769f688ccbe1765e8f00569bc69cd3b9be9158c46e4cc4b510f64fc59adbda2db965bc0c3b003aa36dd5e0199c91fcb650e13385874db36eb7507c13830a3ad434bda46b312a755916d9f";
-
-const encrypt = text => {
-  return enc.encode(text);
-};
-
-const decrypt = data => {
-  return enc.decode(data);
-};
 
 export default storage;

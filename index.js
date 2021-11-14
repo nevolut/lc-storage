@@ -112,10 +112,18 @@ if (typeof localStorage === "undefined" || localStorage === null) {
     };
 }
 var __passphrase = "b2916d4d315c43bf40c204767e7d84ae46253fc785d720a4e51769f688ccbe1765e8f00569bc69cd3b9be9158c46e4cc4b510f64fc59adbda2db965bc0c3b003aa36dd5e0199c91fcb650e13385874db36eb7507c13830a3ad434bda46b312a755916d9f";
-var encrypt = function (text) {
-    return enc_1["default"].encode(text);
+var encrypt = function (data) {
+    if (typeof data == 'object')
+        data = JSON.stringify(data);
+    return enc_1["default"].encode(data);
 };
 var decrypt = function (data) {
-    return enc_1["default"].decode(data);
+    data = enc_1["default"].decode(data);
+    try {
+        return JSON.parse(data);
+    }
+    catch (e) {
+        return data;
+    }
 };
 exports["default"] = storage;

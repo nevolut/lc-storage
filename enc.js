@@ -1,11 +1,11 @@
 "use strict";
 exports.__esModule = true;
 var enc = {
-    encode: function (data) {
-        return btoa(data);
+    encode: function (value) {
+        return btoa(value);
     },
-    decode: function (data) {
-        return atob(data);
+    decode: function (value) {
+        return atob(value);
     }
 };
 exports["default"] = enc;

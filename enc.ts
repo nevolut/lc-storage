@@ -1,9 +1,9 @@
 const enc = {
-  encode: (data: string) => {
-    return btoa(data);
+  encode: (value: string) => {
+    return btoa(value);
   },
-  decode: (data: string) => {
-    return atob(data);
+  decode: (value: string) => {
+    return atob(value);
   }
 };
 

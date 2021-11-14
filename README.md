@@ -74,10 +74,8 @@ If the value is set, it will return the ```value```, else it will return ```null
 
 ```typescript
 interface SetOption {
-  exp: number; // Expiration time in second
-  nullable: boolean; // If the value can be null. default: false
-  encryption: boolean; // If the value should be encrypted, default: false
-  passphrase: string;
+  exp?: number; // Expiration time in second
+  nullable?: boolean; // If the value can be null. default: false
 }
 ```
 
