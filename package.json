@@ -18,5 +18,8 @@
     "browserstorage"
   ],
   "author": "abarchibody",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lc-storage": "2.0.4"
+  }
 }
