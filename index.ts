@@ -21,7 +21,7 @@ const storage = {
       return null;
     }
 
-    const item = window.localStorage.getItem(key);
+    const item = window.localStorage.getItem(key) || "";
 
     try {
       if (!item) return null;
