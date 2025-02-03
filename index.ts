@@ -25,7 +25,9 @@ export const storage = {
       const item = window.localStorage.getItem(key);
       if (!item) return null;
 
-      const values: SetValue<T> = JSON.parse(item);
+      // Decode the item using atob
+      const decodedItem = atob(item);
+      const values: SetValue<T> = JSON.parse(decodedItem);
 
       // ✅ Check expiration
       if (values.exp) {
@@ -73,7 +75,11 @@ export const storage = {
     };
 
     try {
-      window.localStorage.setItem(key, JSON.stringify(_value));
+      // Convert the value object to a JSON string
+      const jsonString = JSON.stringify(_value);
+      // Encode the JSON string using btoa
+      const encodedData = btoa(jsonString);
+      window.localStorage.setItem(key, encodedData);
       return value;
     } catch (error) {
       console.error(`❌ Storage Error: Failed to store ${key}`, error);

@@ -1,6 +1,6 @@
 {
   "name": "lc-storage",
-  "version": "3.0.1",
+  "version": "3.1.1",
   "description": "A lightweight and type-safe utility for interacting with **localStorage** in modern JavaScript & TypeScript applications",
   "main": "index.js",
   "scripts": {
@@ -18,8 +18,5 @@
     "browserstorage"
   ],
   "author": "abarchibody",
-  "license": "ISC",
-  "dependencies": {
-    "lc-storage": "2.0.5"
-  }
+  "license": "ISC"
 }

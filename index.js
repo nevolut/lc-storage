@@ -16,7 +16,9 @@ exports.storage = {
             var item = window.localStorage.getItem(key);
             if (!item)
                 return null;
-            var values = JSON.parse(item);
+            // Decode the item using atob
+            var decodedItem = atob(item);
+            var values = JSON.parse(decodedItem);
             // ✅ Check expiration
             if (values.exp) {
                 var now = Date.now();
@@ -58,7 +60,11 @@ exports.storage = {
             exp: (setOption === null || setOption === void 0 ? void 0 : setOption.exp) ? now + setOption.exp * 1000 : undefined
         };
         try {
-            window.localStorage.setItem(key, JSON.stringify(_value));
+            // Convert the value object to a JSON string
+            var jsonString = JSON.stringify(_value);
+            // Encode the JSON string using btoa
+            var encodedData = btoa(jsonString);
+            window.localStorage.setItem(key, encodedData);
             return value;
         }
         catch (error) {
