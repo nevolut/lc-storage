@@ -1,7 +1,30 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 exports.__esModule = true;
 exports.storage = void 0;
+// Default configuration: no obfuscation for keys or values.
+var config = {
+    obfuscateKeys: false,
+    obfuscateValues: false
+};
 exports.storage = {
+    /**
+     * Sets the storage configuration.
+     * @param {StorageConfig} newConfig - Partial configuration to update.
+     */
+    setConfig: function (newConfig) {
+        config = __assign(__assign({}, config), newConfig);
+    },
     /**
      * Retrieves a value from localStorage with strong type safety.
      * @param {string} key - The key identifier of the data to retrieve.
@@ -13,13 +36,15 @@ exports.storage = {
             return null;
         }
         try {
-            var item = window.localStorage.getItem(key);
+            // Use obfuscation for keys if enabled.
+            var encodedKey = config.obfuscateKeys ? btoa(key) : key;
+            var item = window.localStorage.getItem(encodedKey);
             if (!item)
                 return null;
-            // Decode the item using atob
-            var decodedItem = atob(item);
+            // If values are obfuscated, decode them.
+            var decodedItem = config.obfuscateValues ? atob(item) : item;
             var values = JSON.parse(decodedItem);
-            // ✅ Check expiration
+            // Check expiration, if defined.
             if (values.exp) {
                 var now = Date.now();
                 if (values.exp < now) {
@@ -60,11 +85,13 @@ exports.storage = {
             exp: (setOption === null || setOption === void 0 ? void 0 : setOption.exp) ? now + setOption.exp * 1000 : undefined
         };
         try {
-            // Convert the value object to a JSON string
+            // Serialize the data.
             var jsonString = JSON.stringify(_value);
-            // Encode the JSON string using btoa
-            var encodedData = btoa(jsonString);
-            window.localStorage.setItem(key, encodedData);
+            // If values are to be obfuscated, encode them.
+            var encodedData = config.obfuscateValues ? btoa(jsonString) : jsonString;
+            // Obfuscate the key if needed.
+            var encodedKey = config.obfuscateKeys ? btoa(key) : key;
+            window.localStorage.setItem(encodedKey, encodedData);
             return value;
         }
         catch (error) {
@@ -81,7 +108,8 @@ exports.storage = {
             console.warn("⚠️ Storage Warning: No key provided for remove().");
             return;
         }
-        window.localStorage.removeItem(key);
+        var encodedKey = config.obfuscateKeys ? btoa(key) : key;
+        window.localStorage.removeItem(encodedKey);
     },
     /**
      * Clears all data from localStorage.
@@ -90,7 +118,7 @@ exports.storage = {
         window.localStorage.clear();
     }
 };
-// ✅ Handle environments without `localStorage`
+// Handle environments without `localStorage`
 if (typeof localStorage === "undefined" || localStorage === null) {
     console.warn("⚠️ Storage Warning: localStorage is not available.");
     exports.storage.get = function (key) {

@@ -9,7 +9,26 @@ interface SetValue<T> {
   time: number;
 }
 
+interface StorageConfig {
+  obfuscateKeys: boolean;
+  obfuscateValues: boolean;
+}
+
+// Default configuration: no obfuscation for keys or values.
+let config: StorageConfig = {
+  obfuscateKeys: false,
+  obfuscateValues: false
+};
+
 export const storage = {
+  /**
+   * Sets the storage configuration.
+   * @param {StorageConfig} newConfig - Partial configuration to update.
+   */
+  setConfig(newConfig: Partial<StorageConfig>): void {
+    config = { ...config, ...newConfig };
+  },
+
   /**
    * Retrieves a value from localStorage with strong type safety.
    * @param {string} key - The key identifier of the data to retrieve.
@@ -20,16 +39,17 @@ export const storage = {
       console.error("❌ Storage Error: Key is missing.");
       return null;
     }
-
     try {
-      const item = window.localStorage.getItem(key);
+      // Use obfuscation for keys if enabled.
+      const encodedKey = config.obfuscateKeys ? btoa(key) : key;
+      const item = window.localStorage.getItem(encodedKey);
       if (!item) return null;
 
-      // Decode the item using atob
-      const decodedItem = atob(item);
+      // If values are obfuscated, decode them.
+      const decodedItem = config.obfuscateValues ? atob(item) : item;
       const values: SetValue<T> = JSON.parse(decodedItem);
 
-      // ✅ Check expiration
+      // Check expiration, if defined.
       if (values.exp) {
         const now = Date.now();
         if (values.exp < now) {
@@ -37,7 +57,6 @@ export const storage = {
           return null;
         }
       }
-
       return values.data;
     } catch (error) {
       console.error(`❌ Storage Error: Failed to retrieve ${key}`, error);
@@ -58,16 +77,13 @@ export const storage = {
       console.error("❌ Storage Error: Key is required.");
       return null;
     }
-
     if (value == null || (Array.isArray(value) && value.length === 0)) {
       if (setOption?.nullable) {
         this.remove(key);
       }
       return null;
     }
-
     const now = Date.now();
-
     const _value: SetValue<T> = {
       data: value,
       time: now,
@@ -75,11 +91,13 @@ export const storage = {
     };
 
     try {
-      // Convert the value object to a JSON string
+      // Serialize the data.
       const jsonString = JSON.stringify(_value);
-      // Encode the JSON string using btoa
-      const encodedData = btoa(jsonString);
-      window.localStorage.setItem(key, encodedData);
+      // If values are to be obfuscated, encode them.
+      const encodedData = config.obfuscateValues ? btoa(jsonString) : jsonString;
+      // Obfuscate the key if needed.
+      const encodedKey = config.obfuscateKeys ? btoa(key) : key;
+      window.localStorage.setItem(encodedKey, encodedData);
       return value;
     } catch (error) {
       console.error(`❌ Storage Error: Failed to store ${key}`, error);
@@ -96,7 +114,8 @@ export const storage = {
       console.warn("⚠️ Storage Warning: No key provided for remove().");
       return;
     }
-    window.localStorage.removeItem(key);
+    const encodedKey = config.obfuscateKeys ? btoa(key) : key;
+    window.localStorage.removeItem(encodedKey);
   },
 
   /**
@@ -107,7 +126,7 @@ export const storage = {
   }
 };
 
-// ✅ Handle environments without `localStorage`
+// Handle environments without `localStorage`
 if (typeof localStorage === "undefined" || localStorage === null) {
   console.warn("⚠️ Storage Warning: localStorage is not available.");
 
