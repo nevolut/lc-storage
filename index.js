@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
-var storage = {
+exports.storage = void 0;
+exports.storage = {
     /**
      * Retrieves a value from localStorage with strong type safety.
      * @param {string} key - The key identifier of the data to retrieve.
@@ -86,19 +87,18 @@ var storage = {
 // ✅ Handle environments without `localStorage`
 if (typeof localStorage === "undefined" || localStorage === null) {
     console.warn("⚠️ Storage Warning: localStorage is not available.");
-    storage.get = function (key) {
+    exports.storage.get = function (key) {
         console.warn("⚠️ Storage Warning: localStorage is unavailable. Returning key as fallback.");
         return key;
     };
-    storage.set = function (key, value, setOption) {
+    exports.storage.set = function (key, value, setOption) {
         console.warn("⚠️ Storage Warning: localStorage is unavailable. Simulating set operation.");
         return value;
     };
-    storage.remove = function () {
+    exports.storage.remove = function () {
         console.warn("⚠️ Storage Warning: localStorage is unavailable. Remove skipped.");
     };
-    storage.clear = function () {
+    exports.storage.clear = function () {
         console.warn("⚠️ Storage Warning: localStorage is unavailable. Clear skipped.");
     };
 }
-exports["default"] = storage;

@@ -9,7 +9,7 @@ interface SetValue<T> {
   time: number;
 }
 
-const storage = {
+export const storage = {
   /**
    * Retrieves a value from localStorage with strong type safety.
    * @param {string} key - The key identifier of the data to retrieve.
@@ -131,5 +131,3 @@ if (typeof localStorage === "undefined" || localStorage === null) {
     );
   };
 }
-
-export default storage;
