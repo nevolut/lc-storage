@@ -1,105 +1,184 @@
-# LC-STORAGE
+# **LC-STORAGE** 🗄️
 
-lc-storage is used:
+`lc-storage` is a lightweight and type-safe utility for interacting with **localStorage** in modern JavaScript & TypeScript applications.
 
-- Read data from the local storage
-- Write data to the local storage
-- Delete data from the local storage
-- Clear the local storage
+## **🚀 Features**
+✔ **Read** data from `localStorage`
+✔ **Write** data to `localStorage`
+✔ **Delete** specific keys from `localStorage`
+✔ **Clear all** data from `localStorage`
+✔ **Supports automatic expiration (`exp`)**
+✔ **Type-safe retrieval (`get<T>()`)**
 
-## Usage
+---
 
-### Installation
-
-```bash
+## **📦 Installation**
+Install via npm:
+```sh
 npm i lc-storage --save
 ```
 
-#### Data
+## 🛠 Usage
 
-```javascript
-const data = [1, 2, 3, 4];
-```
+#### 📌 Import storage
 
-#### Import storage from 'lc-storage'
-
-```javascript
+```ts
 import storage from "lc-storage";
 ```
 
-##### Save to localstorage
+#### 🔥 Storing and Retrieving Data
 
-```javascript
+###### ✅ Save Data to localStorage
+
+```ts
+const data = [1, 2, 3, 4];
 storage.set("data", data);
 ```
 
-##### Read to localstorage
+###### ✅ Retrieve Data from localStorage
 
-```javascript
+```ts
 const myData = storage.get("data");
+console.log(myData); // [1, 2, 3, 4]
 ```
 
-```javascript
-console.log(myData);
-// [1, 2, 3, 4]
-```
+###### ✅ Delete Data from localStorage
 
-##### Delete data to localstorage
-
-```javascript
+```ts
 storage.remove("data");
 ```
 
-##### Clear localstorage
+###### ✅ Clear All Data from localStorage
 
-```javascript
+```ts
 storage.clear();
 ```
 
-### Set method
+### 📌 Advanced Usage
 
-- Sets the value of the pair identified by key to value,
-- creating a new key/value pair if none existed for key previously.
+💾 ```set()``` Method – Store Data with Expiration & Nullable Options
 
-```javascript
-storage.set(key: string, value: any, setOption?: SetOption): any
-storage.set(key: string, value: any, { exp?: number, nullable?: boolean }): any
+The set() method allows you to store data in localStorage with optional settings.
+
+###### 📌 Method Signature
+
+```ts
+storage.set<T>(key: string, value: T, setOption?: SetOption): T | null;
 ```
 
-* key ```string``` ```required```: The key identifier of data to set
-* value ```any``` ```required```:  The value to store
-* setOption ```object``` ```optional```: Advance set configuratioon
+Parameter	Type	Required	Description
+key	string	✅	Unique identifier for the stored data.
+value	T (generic)	✅	The value to be stored (objects, arrays, primitives).
+setOption	SetOption	❌	Configuration for expiration & nullability.
 
-If the value is set, it will return the ```value```, else it will return ```null```
+###### 📌 SetOption Interface
 
-
-```typescript
+```ts
 interface SetOption {
-  exp?: number; // Expiration time in second
-  nullable?: boolean; // If the value can be null. default: false
+  exp?: number;  // Expiration time in seconds
+  nullable?: boolean; // If true, allows setting null values (default: false)
 }
 ```
 
-```javascript
-// Will store [1, 2, 3, 4] in local storage with data as key.
-storage.set("data", data, { exp: 60 });
-// Before 60 seconds, you can get the data value
-// After 60 seconds, if you call storage.get('data'), it will return null
+###### ✅ Example: Store Data with Expiration
 
-console.log(storage.get('data')) // [1, 2, 3, 4]
+```ts
+// Store data with a 60-second expiration
+storage.set("sessionData", { user: "JohnDoe" }, { exp: 60 });
 
+// Before 60 seconds, you can retrieve the value:
+console.log(storage.get("sessionData")); // { user: "JohnDoe" }
+
+// After 60 seconds, the value automatically expires and returns `null`
 setTimeout(() => {
-  console.log(storage.get('data')) // null
-}, 60 * 1000)
-
+  console.log(storage.get("sessionData")); // null
+}, 60 * 1000);
 ```
 
-### Get method
+📌 ```get<T>()``` Method – Retrieve Data with Type Safety
 
-Retrieves a value from the storage
+The ```get()``` method allows type-safe retrieval of stored values.
 
-```javascript
-storage.get(key: string): any
+###### 📌 Method Signature
+
+```ts
+storage.get<T>(key: string): T | null;
 ```
 
-Returns the current value associated with the given key, or null if the given key does not exist.
+Parameter	Type	Required	Description
+key	string	✅	The key identifier of the stored data.
+
+Returns T (the stored value) or null if the key does not exist.
+
+###### ✅ Example: Retrieve Data with Type Safety
+
+```ts
+// Store user info
+storage.set("user", { name: "Alice", age: 25 });
+
+// Retrieve with correct type
+const user = storage.get<{ name: string; age: number }>("user");
+
+console.log(user?.name); // "Alice"
+console.log(user?.age);  // 25
+```
+
+📌 ```remove()``` Method – Delete a Key
+
+The ```remove()``` method deletes a specific key-value pair from localStorage.
+
+###### ✅ Example
+```ts
+storage.remove("user"); // Removes "user" from storage
+console.log(storage.get("user")); // null
+```
+📌 ```clear()``` Method – Clear All Data
+
+The ```clear()``` method removes all stored data from localStorage.
+
+###### ✅ Example
+
+```ts
+storage.clear(); // Clears everything from localStorage
+```
+
+## ⚠️ Edge Case Handling
+
+| Scenario                              | Behavior                              |
+----------------------------------------|----------------------------------------
+| Key does not exist in get()           |	Returns null                          |
+| Expired data                          | Automatically removed & returns null  |
+| Setting null without nullable: true   |	Prevents storage                      |
+| Browser without localStorage support  |	Logs warnings, but prevents crashes   |
+
+
+## 📌 Summary Table
+
+| Method                         | Description                |	Example         |
+|--------------------------------|----------------------------|-----------------|
+| storage.set<T>(key, value, options?) | Stores data with optional expiration	| storage.set("token", "abc123", { exp: 3600 }) |
+| storage.get<T>(key) |	Retrieves data (type-safe) |	const user = storage.get<{ name: string }>("user") |
+| storage.remove(key) |	Deletes a specific key	| storage.remove("user")
+storage.clear() |	Clears all stored data	| storage.clear() |
+
+
+## 🔥 Why Use lc-storage?
+
+✔ Supports exp (expiration time) to automatically remove stale data
+✔ Type-safe with generics for better TypeScript support
+✔ Safer handling of missing or expired data
+✔ Prevents crashes if localStorage is unavailable
+✔ Small & fast – No dependencies!
+
+## 🚀 Future Enhancements
+
+Would you like to see:
+	•	🔒 Encryption support for storing sensitive data?
+	•	📂 Support for sessionStorage?
+	•	📌 Automatic data sync with IndexedDB for large storage?
+
+📌 Contributions are welcome! If you find a bug or have an idea for improvement, feel free to open a pull request or issue. 🚀😊
+
+## 📜 License
+
+This project is licensed under the MIT License.

@@ -1,125 +1,134 @@
 interface SetOption {
-  exp?: number; // Expiration time in second
-  nullable?: boolean;
+  exp?: number; // Expiration time in seconds
+  nullable?: boolean; // Allow setting null values
 }
 
-interface SetValue {
-  exp?: number; // Expiration time in second
-  data: unknown;
+interface SetValue<T> {
+  exp?: number; // Expiration time in milliseconds
+  data: T;
   time: number;
 }
 
 const storage = {
   /**
-   * The get method retrieves a value from the storage.
-   * @param {string} key  The key identifier of data to get
-   * @returns The current value associated with the given key, or null if the given key does not exist in the list associated with the object.
+   * Retrieves a value from localStorage with strong type safety.
+   * @param {string} key - The key identifier of the data to retrieve.
+   * @returns {T | null} - The value associated with the key or null if it doesn't exist or has expired.
    */
-  get(key: string): unknown {
+  get<T>(key: string): T | null {
     if (!key) {
-      console.error("Key is missing");
+      console.error("❌ Storage Error: Key is missing.");
       return null;
     }
 
-    const item = window.localStorage.getItem(key) || "";
-
     try {
+      const item = window.localStorage.getItem(key);
       if (!item) return null;
 
-      const values: SetValue = JSON.parse(item);
-      // We return data if the exist in the storage object
-      if (values?.data) {
-        /**
-         * Check if the data was stored with an expiration data
-         * Return the data if it has not expired or null if it has
-         * */
-        if (values.exp) {
-          const now = new Date().getTime();
-          const diff = values.exp - now;
-          if (diff < 0) {
-            this.remove(key);
-            return null;
-          }
-        }
+      const values: SetValue<T> = JSON.parse(item);
 
-        return values.data;
+      // ✅ Check expiration
+      if (values.exp) {
+        const now = Date.now();
+        if (values.exp < now) {
+          this.remove(key);
+          return null;
+        }
       }
-    } catch (e) {
-      // On error we will remove the key from the storage
-      // And return null
-      this.remove(key);
+
+      return values.data;
+    } catch (error) {
+      console.error(`❌ Storage Error: Failed to retrieve ${key}`, error);
+      this.remove(key); // Remove corrupted entry
+      return null;
     }
-    return null;
   },
 
   /**
-   * Sets the value of the pair identified by key to value,
-   * creating a new key/value pair if none existed for key previously.
-   * @param {string} key The key identifier of data to set
-   * @param {unknown} value The value to store
-   * @param {SetOption} setOption The options
-   * @returns The value if set, or null if not set
+   * Stores a value in localStorage with optional expiration time.
+   * @param {string} key - The key identifier of the data.
+   * @param {T} value - The value to store.
+   * @param {SetOption} setOption - Optional settings (e.g., expiration).
+   * @returns {T | null} - The stored value if successful, or null on failure.
    */
-  set(key: string, value: unknown, setOption?: SetOption): unknown {
-    if (!value || value == {} || (Array.isArray(value) && !value.length)) {
-      if (setOption?.nullable) this.remove(key);
-      else return null;
+  set<T>(key: string, value: T, setOption?: SetOption): T | null {
+    if (!key) {
+      console.error("❌ Storage Error: Key is required.");
+      return null;
     }
 
-    const now = new Date().getTime();
+    if (value == null || (Array.isArray(value) && value.length === 0)) {
+      if (setOption?.nullable) {
+        this.remove(key);
+      }
+      return null;
+    }
 
-    const _value: SetValue = {
+    const now = Date.now();
+
+    const _value: SetValue<T> = {
       data: value,
-      time: now
+      time: now,
+      exp: setOption?.exp ? now + setOption.exp * 1000 : undefined
     };
-
-    if (setOption?.exp) _value.exp = now + setOption.exp * 1000;
 
     try {
       window.localStorage.setItem(key, JSON.stringify(_value));
       return value;
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(`❌ Storage Error: Failed to store ${key}`, error);
       return null;
     }
   },
 
   /**
-   * Removes the key/value pair with the given key,
-   * if a key/value pair with the given key exists.
-   * @param {key} string The key identifier of data to remove
-   * @returns {boolean} {value} if the data was removed
+   * Removes an item from localStorage.
+   * @param {string} key - The key of the data to remove.
    */
   remove(key: string): void {
+    if (!key) {
+      console.warn("⚠️ Storage Warning: No key provided for remove().");
+      return;
+    }
     window.localStorage.removeItem(key);
   },
 
   /**
-   * Removes all key/value pairs, if there are any.
+   * Clears all data from localStorage.
    */
   clear(): void {
     window.localStorage.clear();
   }
 };
 
+// ✅ Handle environments without `localStorage`
 if (typeof localStorage === "undefined" || localStorage === null) {
-  storage.get = (key: string): unknown => {
-    console.warn("localStorage is not defined");
-    return key;
+  console.warn("⚠️ Storage Warning: localStorage is not available.");
+
+  storage.get = <T>(key: string): T | null => {
+    console.warn(
+      "⚠️ Storage Warning: localStorage is unavailable. Returning key as fallback."
+    );
+    return key as unknown as T;
   };
-  storage.set = (
-    key: string,
-    value: unknown,
-    setOption?: SetOption
-  ): unknown => {
-    console.warn("localStorage is not defined");
-    return { key, value, setOption };
+
+  storage.set = <T>(key: string, value: T, setOption?: SetOption): T | null => {
+    console.warn(
+      "⚠️ Storage Warning: localStorage is unavailable. Simulating set operation."
+    );
+    return value;
   };
+
   storage.remove = (): void => {
-    console.warn("localStorage is not defined");
+    console.warn(
+      "⚠️ Storage Warning: localStorage is unavailable. Remove skipped."
+    );
   };
+
   storage.clear = (): void => {
-    console.warn("localStorage is not defined");
+    console.warn(
+      "⚠️ Storage Warning: localStorage is unavailable. Clear skipped."
+    );
   };
 }
 

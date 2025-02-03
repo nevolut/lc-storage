@@ -2,105 +2,103 @@
 exports.__esModule = true;
 var storage = {
     /**
-     * The get method retrieves a value from the storage.
-     * @param {string} key  The key identifier of data to get
-     * @returns The current value associated with the given key, or null if the given key does not exist in the list associated with the object.
+     * Retrieves a value from localStorage with strong type safety.
+     * @param {string} key - The key identifier of the data to retrieve.
+     * @returns {T | null} - The value associated with the key or null if it doesn't exist or has expired.
      */
     get: function (key) {
         if (!key) {
-            console.error("Key is missing");
+            console.error("❌ Storage Error: Key is missing.");
             return null;
         }
-        var item = window.localStorage.getItem(key) || "";
         try {
+            var item = window.localStorage.getItem(key);
             if (!item)
                 return null;
             var values = JSON.parse(item);
-            // We return data if the exist in the storage object
-            if (values === null || values === void 0 ? void 0 : values.data) {
-                /**
-                 * Check if the data was stored with an expiration data
-                 * Return the data if it has not expired or null if it has
-                 * */
-                if (values.exp) {
-                    var now = new Date().getTime();
-                    var diff = values.exp - now;
-                    if (diff < 0) {
-                        this.remove(key);
-                        return null;
-                    }
+            // ✅ Check expiration
+            if (values.exp) {
+                var now = Date.now();
+                if (values.exp < now) {
+                    this.remove(key);
+                    return null;
                 }
-                return values.data;
             }
+            return values.data;
         }
-        catch (e) {
-            // On error we will remove the key from the storage
-            // And return null
-            this.remove(key);
+        catch (error) {
+            console.error("\u274C Storage Error: Failed to retrieve ".concat(key), error);
+            this.remove(key); // Remove corrupted entry
+            return null;
         }
-        return null;
     },
     /**
-     * Sets the value of the pair identified by key to value,
-     * creating a new key/value pair if none existed for key previously.
-     * @param {string} key The key identifier of data to set
-     * @param {unknown} value The value to store
-     * @param {SetOption} setOption The options
-     * @returns The value if set, or null if not set
+     * Stores a value in localStorage with optional expiration time.
+     * @param {string} key - The key identifier of the data.
+     * @param {T} value - The value to store.
+     * @param {SetOption} setOption - Optional settings (e.g., expiration).
+     * @returns {T | null} - The stored value if successful, or null on failure.
      */
     set: function (key, value, setOption) {
-        if (!value || value == {} || (Array.isArray(value) && !value.length)) {
-            if (setOption === null || setOption === void 0 ? void 0 : setOption.nullable)
-                this.remove(key);
-            else
-                return null;
+        if (!key) {
+            console.error("❌ Storage Error: Key is required.");
+            return null;
         }
-        var now = new Date().getTime();
+        if (value == null || (Array.isArray(value) && value.length === 0)) {
+            if (setOption === null || setOption === void 0 ? void 0 : setOption.nullable) {
+                this.remove(key);
+            }
+            return null;
+        }
+        var now = Date.now();
         var _value = {
             data: value,
-            time: now
+            time: now,
+            exp: (setOption === null || setOption === void 0 ? void 0 : setOption.exp) ? now + setOption.exp * 1000 : undefined
         };
-        if (setOption === null || setOption === void 0 ? void 0 : setOption.exp)
-            _value.exp = now + setOption.exp * 1000;
         try {
             window.localStorage.setItem(key, JSON.stringify(_value));
             return value;
         }
-        catch (e) {
-            console.error(e);
+        catch (error) {
+            console.error("\u274C Storage Error: Failed to store ".concat(key), error);
             return null;
         }
     },
     /**
-     * Removes the key/value pair with the given key,
-     * if a key/value pair with the given key exists.
-     * @param {key} string The key identifier of data to remove
-     * @returns {boolean} {value} if the data was removed
+     * Removes an item from localStorage.
+     * @param {string} key - The key of the data to remove.
      */
     remove: function (key) {
+        if (!key) {
+            console.warn("⚠️ Storage Warning: No key provided for remove().");
+            return;
+        }
         window.localStorage.removeItem(key);
     },
     /**
-     * Removes all key/value pairs, if there are any.
+     * Clears all data from localStorage.
      */
     clear: function () {
         window.localStorage.clear();
     }
 };
+// ✅ Handle environments without `localStorage`
 if (typeof localStorage === "undefined" || localStorage === null) {
+    console.warn("⚠️ Storage Warning: localStorage is not available.");
     storage.get = function (key) {
-        console.warn("localStorage is not defined");
+        console.warn("⚠️ Storage Warning: localStorage is unavailable. Returning key as fallback.");
         return key;
     };
     storage.set = function (key, value, setOption) {
-        console.warn("localStorage is not defined");
-        return { key: key, value: value, setOption: setOption };
+        console.warn("⚠️ Storage Warning: localStorage is unavailable. Simulating set operation.");
+        return value;
     };
     storage.remove = function () {
-        console.warn("localStorage is not defined");
+        console.warn("⚠️ Storage Warning: localStorage is unavailable. Remove skipped.");
     };
     storage.clear = function () {
-        console.warn("localStorage is not defined");
+        console.warn("⚠️ Storage Warning: localStorage is unavailable. Clear skipped.");
     };
 }
 exports["default"] = storage;
